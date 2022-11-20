@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %} List of Movies {% endblock %}
+
+{% block content }%
+    {% if is_valid %}
+    <h4>{{ user }}</h4>
+    {% endif %}
+
+    <div class="content">
+        <div class="row">
+            <p>movies count: {{ movies.count }} </p>
+            {% for movie in movies %}
+                <div class="col-sm-4 text-center card">
+                    {% if movie.avatar %}
+                        <img src="{{ movies.avatar.url }}" alt="Movie 1" class="avatar">
+                    {% else %}
+                        <img src="" alt="Movie 1" class="avatar">
+                    {% endif %}
+                </div>
+        </div>
+    </div>
+
+
+{% endblock %}
