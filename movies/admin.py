@@ -25,7 +25,8 @@ class MovieCrewInline(admin.TabularInline):
     extra = 2
     readonly_fields = ('crew_gender',)
 
-    def crew_gender(self, obj):
+    @staticmethod
+    def crew_gender(obj):
         return obj.crew.get_gender_display()
 
 
@@ -42,8 +43,19 @@ class MovieAdmin(admin.ModelAdmin):
     exclude = ('genres',)
 
 
+class MovieCommentAdmin(admin.ModelAdmin):
+    list_display = ['movie', 'user']
+
+    # below def is
+    def save_model(self, request, obj, form, change):
+        if change and not obj.validated_by and 'status' in form.changed_data:
+            obj.validated_by = request.user
+        obj.save()
+
+
 # name of all model classes that we want to have a table of in our admin panel
 admin.site.register(Role, RoleAdmin)
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Crew, CrewAdmin)
 admin.site.register(Movie, MovieAdmin)
+admin.site.register(MovieComment, MovieCommentAdmin)

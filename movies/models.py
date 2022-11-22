@@ -1,7 +1,11 @@
 from django.db import models
+from django.db.models import Avg
+
 from comments.models import AbstractComment
 from config import settings
 from django.core.validators import MaxValueValidator, MinValueValidator  # imported so can be used in rating validation
+
+
 # from users.models import User
 
 
@@ -68,10 +72,17 @@ class Movie(models.Model):
 
     def __str__(self):
         return self.title
+
     # show the object by its title
 
     # def clean(self):
     #     raise ValidationError('Not good')
+
+    # below property and function is used to calculate and display average rating for each movie
+    @property
+    def average_rating(self):
+        rate = self.ratings.all().aggregate(avg=Avg('rate'))
+        return rate.get('avg') or 1  # used "or 1" so if no rate was set, it won't output None
 
 
 class MovieCrew(models.Model):
@@ -86,6 +97,10 @@ class MovieCrew(models.Model):
         # used to make two or more model fields to be true and unique
         # Meta classes are used to add or change a behavior in a class
 
+    # below function is used to capitalize first letter of each movie's name
+    def save(self, *args, **kwargs):
+        self.movie = self.movie.caplitalize()
+
 
 # the below class is used for commenting on movies
 class MovieComment(AbstractComment):
@@ -99,7 +114,7 @@ class CrewComment(AbstractComment):
 
 # BELOW MODEL IS CREATED FOR RATING ON MOVIES
 class MovieRating(models.Model):
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='rating')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='ratings')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='movie_rating')
     rate = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     created_time = models.DateTimeField(auto_now_add=True)
