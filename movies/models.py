@@ -1,6 +1,8 @@
 from django.db import models
+from comments.models import AbstractComment
 from config import settings
-from users.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator  # imported so can be used in rating validation
+# from users.models import User
 
 
 class Genre(models.Model):
@@ -62,7 +64,7 @@ class Movie(models.Model):
 
     def get_description(self):
         # creating a function in order to lower the description while returning it
-        return self.description.lower()  # TODO ask
+        return self.description.lower()
 
     def __str__(self):
         return self.title
@@ -83,3 +85,31 @@ class MovieCrew(models.Model):
         unique_together = ('movie', 'crew', 'role')
         # used to make two or more model fields to be true and unique
         # Meta classes are used to add or change a behavior in a class
+
+
+# the below class is used for commenting on movies
+class MovieComment(AbstractComment):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+
+
+# the below class is used for commenting on crew members
+class CrewComment(AbstractComment):
+    crew = models.ForeignKey(Crew, on_delete=models.CASCADE)
+
+
+# BELOW MODEL IS CREATED FOR RATING ON MOVIES
+class MovieRating(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='rating')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='movie_rating')
+    rate = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    created_time = models.DateTimeField(auto_now_add=True)
+    modified_time = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        # "movie" and "user" fields should be unified, because each user
+        # should only be able to rate each movie at most 1 time
+
+        # unique_together = ('user', 'movie') # this unifying method is deprecated
+
+        # other method is using constraints
+        constraints = [models.UniqueConstraint(fields=('user', 'movie'), name='unique_user_movie')]

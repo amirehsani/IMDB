@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from movies.models import Movie, Crew
 
 
 # comment models will be abstracted from model below
@@ -24,13 +23,4 @@ class AbstractComment(models.Model):
 
     class Meta:
         abstract = True
-
-
-# the below class is used for commenting on movies
-class MovieComment(AbstractComment):
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
-
-
-# the below class is used for commenting on crew members
-class CrewComment(AbstractComment):
-    crew = models.ForeignKey(Crew, on_delete=models.CASCADE)
+    # abstracted commenting classes (MovieComment and CrewComment) are defined in movies/models
